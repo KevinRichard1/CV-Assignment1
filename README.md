@@ -1,6 +1,11 @@
 # Assignment 1
 Repository for training a ConvNeXt on a small dataset
 
+## Dependencies
+```
+pip install -r requirements.txt
+```
+
 ## Training the model
 ```
 python train.py \
