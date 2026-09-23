@@ -7,6 +7,7 @@ class ConvNeXtTiny(nn.Module):
         super().__init__()
 
         self.model = convnext_tiny(weights=ConvNeXt_Tiny_Weights.DEFAULT)
+        self.num_classes = num_classes
 
         in_features = self.model.classifier[-1].in_features
         self.model.classifier[-1] = nn.Linear(in_features, num_classes)

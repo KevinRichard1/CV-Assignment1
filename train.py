@@ -12,6 +12,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms
+from torchvision.transforms import v2
 from utils.ConvNeXtTiny import ConvNeXtTiny, evaluate
 
 SEED = 0
@@ -59,7 +60,10 @@ def load_dataset(data_dir, img_size, batch_size):
 
 def train_model(model, train_loader, val_loader, optimizer, device, epochs=20, patience=5, ckpt_path='./best_model.pth'):
     '''Train model on dataset'''
-    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
+    criterion = nn.CrossEntropyLoss()
+    mixup = v2.MixUp(num_classes=model.num_classes, alpha=0.2)
+    cutmix = v2.CutMix(num_classes=model.num_classes, alpha=1.0)
+    aug = v2.RandomChoice([mixup, cutmix])
     model = model.to(device)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
     best_state = copy.deepcopy(model.state_dict())
@@ -74,6 +78,8 @@ def train_model(model, train_loader, val_loader, optimizer, device, epochs=20, p
         total_seen = 0
 
         for images, labels in train_loader:
+            images, labels = aug(images, labels)
+
             images = images.to(device, non_blocking=True)
             labels = labels.to(device, non_blocking=True)
 
